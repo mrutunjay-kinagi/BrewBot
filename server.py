@@ -8,6 +8,7 @@ from fastapi import FastAPI, Cookie, Response, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from groq import RateLimitError
 
 import conversation
 
@@ -52,7 +53,10 @@ async def chat(req: ChatRequest, response: Response, session_id: str = Cookie(de
     if is_rate_limited(session_id):
         raise HTTPException(status_code=429, detail="You've sent a lot of messages! Take a breather and try again in an hour.")
 
-    reply = conversation.chat(session_id=session_id, text=req.message)
+    try:
+        reply = conversation.chat(session_id=session_id, text=req.message)
+    except RateLimitError:
+        raise HTTPException(status_code=503, detail="BrewBot is taking a short break — the AI service is at capacity. Try again in a few minutes! ☕")
     return {"reply": reply, "session_id": session_id}
 
 
@@ -60,6 +64,9 @@ async def chat(req: ChatRequest, response: Response, session_id: str = Cookie(de
 async def reset(response: Response, session_id: str = Cookie(default=None)):
     if not session_id:
         session_id = str(uuid.uuid4())
-    reply = conversation.start_session(session_id)
+    try:
+        reply = conversation.start_session(session_id)
+    except RateLimitError:
+        reply = "Hey! I'm BrewBot ☕ — taking a short break right now. Try again in a few minutes!"
     response.set_cookie("session_id", session_id, httponly=True, samesite="lax")
     return {"reply": reply, "session_id": session_id}

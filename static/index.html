@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BrewBot ☕</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#f5922a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BrewBot">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -11,18 +16,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     [data-theme="dark"] {
-      --surface:     rgba(10, 8, 20, 0.72);
-      --surface-2:   rgba(255,255,255,0.08);
-      --border:      rgba(255,255,255,0.10);
-      --accent:      #7ee8c2;
-      --accent-2:    #5bc4a0;
-      --user-bg:     rgba(94, 200, 160, 0.35);
-      --bot-bg:      rgba(10, 8, 20, 0.65);
-      --text:        #e8f8f2;
-      --text-sub:    #7ab8a0;
-      --text-strong: #a8ecd4;
-      --input-bg:    rgba(5, 4, 14, 0.70);
-      --glow:        rgba(126, 232, 194, 0.18);
+      --surface:     rgba(18, 5, 8, 0.75);
+      --surface-2:   rgba(255,255,255,0.07);
+      --border:      rgba(244, 120, 80, 0.16);
+      --accent:      #f4845a;
+      --accent-2:    #d4603a;
+      --user-bg:     rgba(210, 85, 45, 0.40);
+      --bot-bg:      rgba(18, 5, 8, 0.68);
+      --text:        #f5922a;
+      --text-sub:    #c46820;
+      --text-strong: #ffb347;
+      --input-bg:    rgba(12, 3, 5, 0.72);
+      --glow:        rgba(244, 132, 90, 0.22);
     }
 
     [data-theme="light"] {
@@ -33,9 +38,9 @@
       --accent-2:    #d4802a;
       --user-bg:     rgba(176, 90, 16, 0.85);
       --bot-bg:      rgba(255, 245, 225, 0.80);
-      --text:        #1e0e04;
-      --text-sub:    #7a4820;
-      --text-strong: #6a2e08;
+      --text:        #5c2d0a;
+      --text-sub:    #9b6030;
+      --text-strong: #7b3a0a;
       --input-bg:    rgba(255, 248, 235, 0.90);
       --glow:        rgba(176, 90, 16, 0.12);
     }
@@ -63,13 +68,14 @@
 
     [data-theme="dark"] body::before {
       background:
-        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0,180,120,0.28) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 5%,  rgba(80,40,180,0.30) 0%, transparent 55%),
-        radial-gradient(ellipse 70% 45% at 50% 0%,  rgba(0,220,180,0.18) 0%, transparent 50%),
-        radial-gradient(ellipse 50% 35% at 10% 40%, rgba(60,0,140,0.22) 0%, transparent 55%),
-        radial-gradient(ellipse 60% 40% at 90% 35%, rgba(0,160,100,0.18) 0%, transparent 50%),
-        linear-gradient(170deg, #050210 0%, #080418 40%, #030d10 70%, #040812 100%);
-      animation: aurora 12s ease-in-out infinite alternate;
+        radial-gradient(ellipse 90% 55% at 50% 0%,   rgba(255, 100, 40, 0.38) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 45% at 15% 15%,  rgba(220, 60, 80, 0.28) 0%, transparent 50%),
+        radial-gradient(ellipse 55% 40% at 85% 10%,  rgba(255, 140, 20, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 50% at 50% 45%,  rgba(140, 30, 60, 0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 70%,  rgba(80, 10, 40, 0.30) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 80% 75%,  rgba(60, 10, 30, 0.25) 0%, transparent 55%),
+        linear-gradient(175deg, #1a050a 0%, #2e0a10 25%, #180510 55%, #0e0308 100%);
+      animation: sunset 14s ease-in-out infinite alternate;
     }
 
     [data-theme="light"] body::before {
@@ -82,11 +88,11 @@
       animation: sunrise 12s ease-in-out infinite alternate;
     }
 
-    @keyframes aurora {
+    @keyframes sunset {
       0%   { filter: hue-rotate(0deg)   brightness(1);    }
-      33%  { filter: hue-rotate(15deg)  brightness(1.08); }
-      66%  { filter: hue-rotate(-10deg) brightness(0.95); }
-      100% { filter: hue-rotate(20deg)  brightness(1.05); }
+      33%  { filter: hue-rotate(12deg)  brightness(1.10); }
+      66%  { filter: hue-rotate(-8deg)  brightness(0.93); }
+      100% { filter: hue-rotate(18deg)  brightness(1.06); }
     }
 
     @keyframes sunrise {
@@ -188,6 +194,26 @@
       color: var(--accent);
     }
 
+    #install-btn {
+      height: 34px;
+      padding: 0 12px;
+      background: none;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: none;
+      align-items: center;
+      gap: 5px;
+    }
+    #install-btn:hover {
+      background: var(--glow);
+    }
+
     /* ── Chat ── */
     #chat {
       flex: 1;
@@ -244,7 +270,29 @@
       background: var(--bot-bg);
       border: 1px solid var(--border);
       border-bottom-left-radius: 5px;
+      position: relative;
     }
+
+    .dl-btn {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s, color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .bubble.bot:hover .dl-btn { opacity: 1; }
+    .dl-btn:hover { color: var(--accent); border-color: var(--accent); }
 
     .bubble.user {
       background: var(--user-bg);
@@ -395,6 +443,10 @@
       </div>
     </div>
     <div class="header-actions">
+      <button id="install-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install app
+      </button>
       <button class="theme-btn" id="theme-btn" title="Toggle theme">🌙</button>
       <button id="reset-btn"><span>New </span>chat</button>
     </div>
@@ -403,10 +455,12 @@
   <div id="chat"></div>
 
   <div id="quick-prompts">
-    <button class="qp">V60 recipe ☕</button>
-    <button class="qp">Best espresso ratio</button>
-    <button class="qp">Iced coffee tips 🧊</button>
+    <button class="qp">V60 recipe</button>
+    <button class="qp">South Indian Filter</button>
+    <button class="qp">Iced pour-over</button>
+    <button class="qp">Anaerobic espresso</button>
     <button class="qp">Fix bitter coffee</button>
+    <button class="qp">Flair Pro recipe</button>
   </div>
 
   <div id="input-area">
@@ -457,6 +511,20 @@
       bubble.className = `bubble ${role}`;
       if (role === 'bot') {
         bubble.innerHTML = marked.parse(text);
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'dl-btn';
+        dlBtn.title = 'Copy to clipboard';
+        dlBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+        dlBtn.addEventListener('click', () => {
+          const plain = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1').replace(/#{1,6}\s/g, '').trim();
+          navigator.clipboard.writeText(plain).then(() => {
+            dlBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+            setTimeout(() => {
+              dlBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+            }, 2000);
+          });
+        });
+        bubble.appendChild(dlBtn);
       } else {
         bubble.textContent = text;
       }
@@ -508,11 +576,15 @@
           body: JSON.stringify({ message: text }),
         });
         typing.remove();
-        if (res.status === 429) {
-          addBubble("You've sent a lot of messages! Take a breather and try again in an hour. ☕", 'bot');
-        } else {
+        if (res.ok) {
           const data = await res.json();
           addBubble(data.reply, 'bot');
+        } else {
+          const data = await res.json().catch(() => ({}));
+          const msg = data.detail || (res.status === 429
+            ? "You've sent a lot of messages! Take a breather and try again in an hour. ☕"
+            : "Something went wrong. Please try again.");
+          addBubble(msg, 'bot');
         }
       } catch {
         typing.remove();
@@ -551,6 +623,30 @@
     });
 
     resetChat();
+
+    // PWA install
+    const installBtn = document.getElementById('install-btn');
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'flex';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') installBtn.style.display = 'none';
+      deferredPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js');
+    }
   </script>
 </body>
 </html>
