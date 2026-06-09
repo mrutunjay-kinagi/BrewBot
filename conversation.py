@@ -5,10 +5,12 @@ from prompts import SYSTEM_PROMPT
 
 load_dotenv()
 
-client = OpenAI(
-    api_key=os.environ["NVIDIA_API_KEY"],
-    api_base=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
-)
+# Configure OpenAI-compatible client using NVIDIA credentials.
+# OpenAI's Python client reads OPENAI_API_KEY and OPENAI_API_BASE from the environment.
+os.environ.setdefault("OPENAI_API_KEY", os.environ.get("NVIDIA_API_KEY", ""))
+os.environ.setdefault("OPENAI_API_BASE", os.environ.get("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"))
+
+client = OpenAI()
 
 MODEL = os.getenv("NVIDIA_MODEL", "google/gemma-3n-e2b-it")
 
