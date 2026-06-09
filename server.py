@@ -8,14 +8,7 @@ from fastapi import FastAPI, Cookie, Response, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-try:
-    from openai.error import RateLimitError as OpenAIRateLimitError
-except Exception:
-    try:
-        import openai
-        OpenAIRateLimitError = getattr(openai, "RateLimitError", getattr(openai, "OpenAIError", Exception))
-    except Exception:
-        OpenAIRateLimitError = Exception
+import requests
 
 load_dotenv()
 
@@ -62,7 +55,10 @@ async def chat(req: ChatRequest, response: Response, session_id: str = Cookie(de
 
     try:
         reply = conversation.chat(session_id=session_id, text=req.message)
-    except OpenAIRateLimitError:
+    except Exception as e:
+        # If the downstream AI service returned 429, treat it as capacity issue.
+        if isinstance(e, requests.exceptions.HTTPError) and getattr(e.response, 'status_code', None) == 429:
+            raise HTTPException(status_code=503, detail="BrewBot is taking a short break — the AI service is at capacity. Try again in a few minutes! ☕")
         raise HTTPException(status_code=503, detail="BrewBot is taking a short break — the AI service is at capacity. Try again in a few minutes! ☕")
     return {"reply": reply, "session_id": session_id}
 
@@ -73,7 +69,10 @@ async def reset(response: Response, session_id: str = Cookie(default=None)):
         session_id = str(uuid.uuid4())
     try:
         reply = conversation.start_session(session_id)
-    except OpenAIRateLimitError:
-        reply = "Hey! I'm BrewBot ☕ — taking a short break right now. Try again in a few minutes!"
+    except Exception as e:
+        if isinstance(e, requests.exceptions.HTTPError) and getattr(e.response, 'status_code', None) == 429:
+            reply = "Hey! I'm BrewBot ☕ — taking a short break right now. Try again in a few minutes!"
+        else:
+            reply = "Hey! I'm BrewBot ☕ — taking a short break right now. Try again in a few minutes!"
     response.set_cookie("session_id", session_id, httponly=True, samesite="lax")
     return {"reply": reply, "session_id": session_id}

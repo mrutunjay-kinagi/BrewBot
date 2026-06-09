@@ -16,7 +16,7 @@ Powered by NVIDIA's OpenAI-compatible API on build.nvidia.com.
 ## Stack
 
 - **Backend** — Python, FastAPI, Uvicorn
-- **AI** — Groq API (Llama 3.3 70B)
+- **AI** — NVIDIA NIM (google/gemma-3n-e2b-it) via direct HTTP to build.nvidia.com
 - **Frontend** — Vanilla HTML/CSS/JS, no framework
 - **Deployment** — Render
 

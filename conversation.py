@@ -1,23 +1,11 @@
 import os
 from dotenv import load_dotenv
 import requests
-from openai import OpenAI
 from prompts import SYSTEM_PROMPT
 
 load_dotenv()
 
-# Configure OpenAI-compatible client using NVIDIA credentials.
-# Ensure OPENAI_* env vars are set before creating the client so the library
-# sends requests to NVIDIA's OpenAI-compatible endpoint instead of OpenAI.
-if os.environ.get("NVIDIA_API_KEY"):
-    os.environ["OPENAI_API_KEY"] = os.environ["NVIDIA_API_KEY"]
-if os.environ.get("NVIDIA_BASE_URL"):
-    os.environ["OPENAI_API_BASE"] = os.environ["NVIDIA_BASE_URL"]
-else:
-    os.environ.setdefault("OPENAI_API_BASE", "https://integrate.api.nvidia.com/v1")
-
-client = OpenAI()
-
+# Use direct HTTP calls to NVIDIA's OpenAI-compatible endpoint (NIM).
 MODEL = os.getenv("NVIDIA_MODEL", "google/gemma-3n-e2b-it")
 
 # {session_id: [{"role": "user"|"assistant", "content": str}]}
@@ -34,23 +22,8 @@ def _send(history: list[dict], text: str) -> str:
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
 
-    use_fallback = os.getenv("FORCE_REQUESTS_FALLBACK", "").lower() in ("1", "true", "yes")
-    if not use_fallback:
-        try:
-            response = client.chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                max_tokens=1024,
-            )
-            reply = response.choices[0].message.content
-            history.append({"role": "assistant", "content": reply})
-            return reply
-        except Exception:
-            # fallback to direct HTTP if OpenAI client fails
-            pass
-
-    # Fallback using requests to NVIDIA / OpenAI-compatible endpoint
-    base = os.environ.get("OPENAI_API_BASE") or os.environ.get("NVIDIA_BASE_URL") or "https://integrate.api.nvidia.com/v1"
+    # Direct HTTP call to NVIDIA / OpenAI-compatible endpoint
+    base = os.environ.get("NVIDIA_BASE_URL") or os.environ.get("OPENAI_API_BASE") or "https://integrate.api.nvidia.com/v1"
     url = base.rstrip("/") + "/chat/completions"
     api_key = os.environ.get("NVIDIA_API_KEY") or os.environ.get("OPENAI_API_KEY")
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json", "Accept": "application/json"}
@@ -65,7 +38,7 @@ def _send(history: list[dict], text: str) -> str:
     r = requests.post(url, headers=headers, json=payload, timeout=30)
     r.raise_for_status()
     j = r.json()
-    # Support both OpenAI-compatible response shapes
+    # Support OpenAI-compatible response shapes
     reply = None
     if isinstance(j, dict):
         choices = j.get("choices") or []
