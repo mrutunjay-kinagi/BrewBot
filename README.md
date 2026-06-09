@@ -1,6 +1,6 @@
 # BrewBot ☕
 
-A specialty coffee chat assistant built for [**@mrutunjay.kinagi**](https://www.instagram.com/mrutunjay.kinagi/) — a web-based AI barista that helps people brew better coffee at home.
+A specialty coffee chat assistant built for [**@jay.is.caffeinating**](https://www.instagram.com/jay.is.caffeinating/) — a web-based AI barista that helps people brew better coffee at home.
 
 Powered by NVIDIA's OpenAI-compatible API on build.nvidia.com.
 

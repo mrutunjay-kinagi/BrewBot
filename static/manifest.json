@@ -1,7 +1,7 @@
 {
   "name": "BrewBot",
   "short_name": "BrewBot",
-  "description": "Your personal AI coffee expert by @mrutunjay.kinagi",
+  "description": "Your personal AI coffee expert by @jay.is.caffeinating",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a050a",
