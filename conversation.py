@@ -7,7 +7,7 @@ load_dotenv()
 
 client = OpenAI(
     api_key=os.environ["NVIDIA_API_KEY"],
-    base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+    api_base=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
 )
 
 MODEL = os.getenv("NVIDIA_MODEL", "google/gemma-3n-e2b-it")
