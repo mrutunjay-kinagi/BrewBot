@@ -24,14 +24,16 @@ There are no tests or linter configs in this project.
 
 BrewBot is a single-page coffee assistant chatbot. The stack is minimal by design:
 
-- **`server.py`** — FastAPI app. Exposes two endpoints: `POST /api/chat` and `POST /api/reset`. Manages session cookies (UUID), enforces in-memory rate limiting (20 messages/session/hour via `_rate_store`), and delegates all AI logic to `conversation.py`.
-- **`conversation.py`** — Owns the session state (`sessions` dict keyed by session ID). Calls the Groq API (Llama 3.3 70B) with the system prompt prepended to each request. History is capped at 20 messages by trimming from the front. `start_session` resets history and sends an introductory prompt; `chat` continues an existing session.
+- **`server.py`** — FastAPI app. Exposes three endpoints: `POST /api/chat` (send a message), `POST /api/reset` (new session), and `POST /api/edit` (edit a user message and regenerate response). Manages session cookies (UUID), enforces in-memory rate limiting (20 messages/session/hour via `_rate_store`), and delegates all AI logic to `conversation.py`.
+- **`conversation.py`** — Owns the session state (`sessions` dict keyed by session ID). Calls NVIDIA's API (google/gemma-3n-e2b-it) via direct HTTP POST to https://integrate.api.nvidia.com/v1/chat/completions with the system prompt prepended to each request. History is capped at 20 messages by trimming from the front. Functions: `start_session` (reset), `chat` (send message), `edit_message` (edit and regenerate).
 - **`prompts.py`** — Contains the single `SYSTEM_PROMPT` string that defines BrewBot's persona, coffee knowledge, ratios, recipe format, scope constraints, and jailbreak guardrails.
-- **`static/`** — Vanilla HTML/CSS/JS frontend. No build step.
+- **`static/`** — Vanilla HTML/CSS/JS frontend. No build step, no bundler. Frontend includes edit UI with modal dialog for message editing.
 
 **Session lifecycle:** Browser gets a `session_id` cookie on first chat or reset. All state (history, rate limit timestamps) lives in server memory — restarts clear everything.
 
-**Deployment:** Render. The `Procfile` sets the start command. The `.env.example` note about `GEMINI_API_KEY` is a leftover — the actual required key is `NVIDIA_API_KEY`.
+**Edit feature:** When a user edits a message, the `/api/edit` endpoint truncates the conversation history to before the edited message, re-sends with the new text, and returns the new response. The frontend removes all messages from that edit point onward and renders the new conversation.
+
+**Deployment:** Render. The `Procfile` sets the start command. Required: `NVIDIA_API_KEY` from https://build.nvidia.com/.
 
 ## Key constraints
 

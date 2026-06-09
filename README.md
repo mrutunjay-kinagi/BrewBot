@@ -13,6 +13,14 @@ Powered by NVIDIA's OpenAI-compatible API on build.nvidia.com.
 - Stays strictly on-topic — coffee and coffee beverages only
 - Prompt injection and jailbreak protection built in
 
+## Features
+
+- **Edit messages** — Hover over your messages to see the edit button (✏️). Click to revise your question and get a new response, just like ChatGPT
+- **Copy responses** — Hover over BrewBot's replies to see the copy button; click to copy the recipe or advice to clipboard
+- **Dark/Light themes** — Toggle between cozy dark and bright light themes
+- **Responsive design** — Works on mobile, tablet, and desktop
+- **PWA support** — Install as an app on your phone (iOS/Android)
+
 ## Stack
 
 - **Backend** — Python, FastAPI, Uvicorn
