@@ -298,6 +298,115 @@
       background: var(--user-bg);
       border-bottom-right-radius: 5px;
       color: #fff;
+      position: relative;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .user-msg-content {
+      flex: 1;
+    }
+
+    .edit-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s, background 0.2s;
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      padding: 0;
+    }
+    .msg-row.user:hover .edit-btn { opacity: 1; }
+    .edit-btn:hover { background: rgba(255,255,255,0.2); }
+
+    .edit-mode {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .edit-mode.active { display: flex; }
+
+    .edit-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .edit-dialog h3 {
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .edit-dialog textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.93rem;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+      min-height: 80px;
+      margin-bottom: 12px;
+    }
+
+    .edit-dialog textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .edit-dialog .buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .edit-dialog button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .edit-dialog button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .edit-dialog button.save {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .edit-dialog button.save:hover {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
     }
 
     .bubble.typing {
@@ -472,6 +581,17 @@
     </button>
   </div>
 
+  <div id="edit-mode" class="edit-mode">
+    <div class="edit-dialog">
+      <h3>Edit your message</h3>
+      <textarea id="edit-textarea" placeholder="Edit your message..."></textarea>
+      <div class="buttons">
+        <button id="edit-cancel">Cancel</button>
+        <button id="edit-save" class="save">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const chatEl   = document.getElementById('chat');
     const msg      = document.getElementById('msg');
@@ -499,7 +619,7 @@
       });
     });
 
-    function addBubble(text, role) {
+    function addBubble(text, role, messageIndex = null) {
       const row = document.createElement('div');
       row.className = `msg-row ${role}`;
 
@@ -509,6 +629,7 @@
 
       const bubble = document.createElement('div');
       bubble.className = `bubble ${role}`;
+      
       if (role === 'bot') {
         bubble.innerHTML = marked.parse(text);
         const dlBtn = document.createElement('button');
@@ -526,7 +647,17 @@
         });
         bubble.appendChild(dlBtn);
       } else {
-        bubble.textContent = text;
+        const content = document.createElement('div');
+        content.className = 'user-msg-content';
+        content.textContent = text;
+        bubble.appendChild(content);
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.title = 'Edit message';
+        editBtn.innerHTML = '✏️';
+        editBtn.addEventListener('click', () => openEditDialog(text, messageIndex));
+        bubble.appendChild(editBtn);
       }
 
       row.appendChild(av);
@@ -562,7 +693,8 @@
       const qp = document.getElementById('quick-prompts');
       if (qp) qp.style.display = 'none';
 
-      addBubble(text, 'user');
+      const userMessageIndex = document.querySelectorAll('.msg-row.user').length;
+      addBubble(text, 'user', userMessageIndex);
       msg.value = '';
       msg.style.height = 'auto';
       sendBtn.disabled = true;
@@ -613,6 +745,69 @@
     sendBtn.addEventListener('click', sendMessage);
     resetBtn.addEventListener('click', resetChat);
 
+    function openEditDialog(originalText, messageIndex) {
+      const dialog = document.getElementById('edit-mode');
+      const textarea = document.getElementById('edit-textarea');
+      textarea.value = originalText;
+      textarea.focus();
+      textarea.select();
+      dialog.classList.add('active');
+      
+      document.getElementById('edit-save').onclick = () => handleEditSubmit(messageIndex);
+      document.getElementById('edit-cancel').onclick = () => closeEditDialog();
+    }
+
+    function closeEditDialog() {
+      document.getElementById('edit-mode').classList.remove('active');
+    }
+
+    async function handleEditSubmit(messageIndex) {
+      const newText = document.getElementById('edit-textarea').value.trim();
+      if (!newText) return;
+
+      closeEditDialog();
+      sendBtn.disabled = true;
+
+      // Remove the edited message and all messages after it
+      const userRows = document.querySelectorAll('.msg-row.user');
+      const editedRow = userRows[messageIndex];
+      let nextRow = editedRow.nextElementSibling;
+      editedRow.remove();
+      while (nextRow) {
+        const temp = nextRow.nextElementSibling;
+        nextRow.remove();
+        nextRow = temp;
+      }
+
+      // Show typing indicator
+      const typing = addTyping();
+
+      try {
+        const res = await fetch('/api/edit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message_index: messageIndex, new_text: newText }),
+        });
+        typing.remove();
+        
+        if (res.ok) {
+          addBubble(newText, 'user', messageIndex);
+          const data = await res.json();
+          addBubble(data.reply, 'bot');
+        } else {
+          const data = await res.json().catch(() => ({}));
+          const errMsg = data.detail || 'Something went wrong.';
+          addBubble(errMsg, 'bot');
+        }
+      } catch {
+        typing.remove();
+        addBubble('Something went wrong. Please try again.', 'bot');
+      } finally {
+        sendBtn.disabled = false;
+        msg.focus();
+      }
+    }
+
     msg.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
@@ -623,6 +818,18 @@
     });
 
     resetChat();
+
+    // Close edit dialog on overlay click
+    document.getElementById('edit-mode').addEventListener('click', e => {
+      if (e.target.id === 'edit-mode') closeEditDialog();
+    });
+
+    // Close edit dialog on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('edit-mode').classList.contains('active')) {
+        closeEditDialog();
+      }
+    });
 
     // PWA install
     const installBtn = document.getElementById('install-btn');

@@ -63,3 +63,38 @@ def chat(session_id: str, text: str) -> str:
 
 def clear_session(session_id: str) -> None:
     sessions.pop(session_id, None)
+
+
+def edit_message(session_id: str, user_message_index: int, new_text: str) -> str:
+    """Edit a user message and regenerate the response.
+    
+    Args:
+        session_id: The session ID
+        user_message_index: The index of the user message to edit (0-based, counting only user messages)
+        new_text: The new message text
+    
+    Returns:
+        The new assistant response
+    """
+    history = sessions.get(session_id, [])
+    if not history:
+        raise ValueError("Session not found")
+    
+    # Find the actual index of the user message to edit (count only user messages)
+    user_count = 0
+    edit_index = -1
+    for i, msg in enumerate(history):
+        if msg['role'] == 'user':
+            if user_count == user_message_index:
+                edit_index = i
+                break
+            user_count += 1
+    
+    if edit_index == -1:
+        raise ValueError("User message index out of range")
+    
+    # Truncate history to before the edited message (keep all messages before it)
+    history[:] = history[:edit_index]
+    
+    # Re-send with the new text
+    return _send(history, new_text)
