@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import requests
 from openai import OpenAI
 from prompts import SYSTEM_PROMPT
 
@@ -31,13 +32,48 @@ def _send(history: list[dict], text: str) -> str:
     if len(history) > MAX_HISTORY:
         history[:] = history[-MAX_HISTORY:]
 
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "system", "content": SYSTEM_PROMPT}] + history,
-        max_tokens=1024,
-    )
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
 
-    reply = response.choices[0].message.content
+    use_fallback = os.getenv("FORCE_REQUESTS_FALLBACK", "").lower() in ("1", "true", "yes")
+    if not use_fallback:
+        try:
+            response = client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                max_tokens=1024,
+            )
+            reply = response.choices[0].message.content
+            history.append({"role": "assistant", "content": reply})
+            return reply
+        except Exception:
+            # fallback to direct HTTP if OpenAI client fails
+            pass
+
+    # Fallback using requests to NVIDIA / OpenAI-compatible endpoint
+    base = os.environ.get("OPENAI_API_BASE") or os.environ.get("NVIDIA_BASE_URL") or "https://integrate.api.nvidia.com/v1"
+    url = base.rstrip("/") + "/chat/completions"
+    api_key = os.environ.get("NVIDIA_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json", "Accept": "application/json"}
+    payload = {
+        "model": MODEL,
+        "messages": messages,
+        "max_tokens": 1024,
+        "temperature": float(os.getenv("DEFAULT_TEMPERATURE", 0.2)),
+        "top_p": float(os.getenv("DEFAULT_TOP_P", 0.7)),
+        "stream": False,
+    }
+    r = requests.post(url, headers=headers, json=payload, timeout=30)
+    r.raise_for_status()
+    j = r.json()
+    # Support both OpenAI-compatible response shapes
+    reply = None
+    if isinstance(j, dict):
+        choices = j.get("choices") or []
+        if choices:
+            msg = choices[0].get("message") or {}
+            reply = msg.get("content") or choices[0].get("text")
+    if reply is None:
+        reply = str(j)
     history.append({"role": "assistant", "content": reply})
     return reply
 
