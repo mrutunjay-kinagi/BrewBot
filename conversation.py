@@ -6,9 +6,14 @@ from prompts import SYSTEM_PROMPT
 load_dotenv()
 
 # Configure OpenAI-compatible client using NVIDIA credentials.
-# OpenAI's Python client reads OPENAI_API_KEY and OPENAI_API_BASE from the environment.
-os.environ.setdefault("OPENAI_API_KEY", os.environ.get("NVIDIA_API_KEY", ""))
-os.environ.setdefault("OPENAI_API_BASE", os.environ.get("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"))
+# Ensure OPENAI_* env vars are set before creating the client so the library
+# sends requests to NVIDIA's OpenAI-compatible endpoint instead of OpenAI.
+if os.environ.get("NVIDIA_API_KEY"):
+    os.environ["OPENAI_API_KEY"] = os.environ["NVIDIA_API_KEY"]
+if os.environ.get("NVIDIA_BASE_URL"):
+    os.environ["OPENAI_API_BASE"] = os.environ["NVIDIA_BASE_URL"]
+else:
+    os.environ.setdefault("OPENAI_API_BASE", "https://integrate.api.nvidia.com/v1")
 
 client = OpenAI()
 

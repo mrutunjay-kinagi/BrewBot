@@ -17,9 +17,9 @@ except Exception:
     except Exception:
         OpenAIRateLimitError = Exception
 
-import conversation
-
 load_dotenv()
+
+import conversation
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
