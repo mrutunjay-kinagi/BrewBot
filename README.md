@@ -2,7 +2,7 @@
 
 A specialty coffee chat assistant built for [**@mrutunjay.kinagi**](https://www.instagram.com/mrutunjay.kinagi/) — a web-based AI barista that helps people brew better coffee at home.
 
-Powered by Groq (Llama 3.3 70B).
+Powered by NVIDIA's OpenAI-compatible API on build.nvidia.com.
 
 ## What it does
 
@@ -29,7 +29,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Add your GROQ_API_KEY from console.groq.com
+# Add your NVIDIA_API_KEY from build.nvidia.com
 uvicorn server:app --reload
 ```
 
@@ -39,4 +39,6 @@ Open [http://localhost:8000](http://localhost:8000)
 
 | Variable | Description |
 |---|---|
-| `GROQ_API_KEY` | API key from [console.groq.com](https://console.groq.com) |
+| `NVIDIA_API_KEY` | API key from [build.nvidia.com](https://build.nvidia.com/) |
+| `NVIDIA_MODEL` | Optional model slug, default `google/gemma-3n-e2b-it` |
+| `NVIDIA_BASE_URL` | Optional API base URL, default `https://integrate.api.nvidia.com/v1` |

@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 # Copy and fill in env vars
 cp .env.example .env
-# Add GROQ_API_KEY from console.groq.com
+# Add NVIDIA_API_KEY from build.nvidia.com
 
 # Run dev server (auto-reloads on save)
 uvicorn server:app --reload
@@ -31,7 +31,7 @@ BrewBot is a single-page coffee assistant chatbot. The stack is minimal by desig
 
 **Session lifecycle:** Browser gets a `session_id` cookie on first chat or reset. All state (history, rate limit timestamps) lives in server memory — restarts clear everything.
 
-**Deployment:** Render. The `Procfile` sets the start command. The `.env.example` note about `GEMINI_API_KEY` is a leftover — the actual required key is `GROQ_API_KEY`.
+**Deployment:** Render. The `Procfile` sets the start command. The `.env.example` note about `GEMINI_API_KEY` is a leftover — the actual required key is `NVIDIA_API_KEY`.
 
 ## Key constraints
 

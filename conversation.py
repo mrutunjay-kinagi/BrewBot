@@ -1,13 +1,16 @@
 import os
 from dotenv import load_dotenv
-from groq import Groq
+from openai import OpenAI
 from prompts import SYSTEM_PROMPT
 
 load_dotenv()
 
-client = Groq(api_key=os.environ["GROQ_API_KEY"])
+client = OpenAI(
+    api_key=os.environ["NVIDIA_API_KEY"],
+    base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+)
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = os.getenv("NVIDIA_MODEL", "google/gemma-3n-e2b-it")
 
 # {session_id: [{"role": "user"|"assistant", "content": str}]}
 sessions: dict[str, list[dict]] = {}

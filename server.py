@@ -8,7 +8,7 @@ from fastapi import FastAPI, Cookie, Response, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from groq import RateLimitError
+from openai import RateLimitError
 
 import conversation
 
